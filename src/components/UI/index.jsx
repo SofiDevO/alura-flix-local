@@ -26,13 +26,13 @@ export const Btn = styled.button`
 /* Elementos del formulario */
 
 export const Container = styled.div`
-	    height: 138vh;
-    color: #f5f5f5;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    font-size: 1.8rem;
-    align-items: center;
+	height: 138vh;
+	color: #f5f5f5;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	font-size: 1.8rem;
+	align-items: center;
 `;
 
 export const FormularioTitulo = styled.h2`
@@ -161,6 +161,23 @@ export const ContenedorBotones = styled.div`
 		align-items: center;
 		gap: 2rem;
 	}
+`;
+
+export const Input = styled.input`
+	width: 100%;
+	height: 50px;
+	flex-shrink: 0;
+	background-color: ${colorGrayLight};
+	display: flex;
+	height: 35px;
+	padding: 0.5rem;
+	flex-direction: column;
+	justify-content: center;
+	flex-shrink: 0;
+	border: none;
+	outline-style: none;
+	color: ${colorGrayLigther};
+	font-weight: 600;
 `;
 
 export const EviarLimpiar = styled.div`

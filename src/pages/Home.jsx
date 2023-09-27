@@ -1,4 +1,4 @@
-import Hero from "../components/Hero"
+import Hero from "../components/Hero/Hero"
 import styled from "styled-components"
 import VideoLista from "../components/SliderElements/Videos"
 import { colorGrayMedium } from "../components/UI/variables"

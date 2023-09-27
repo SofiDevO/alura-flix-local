@@ -1,34 +1,70 @@
-import styled from "styled-components";
-import { useState, useEffect } from "react";
-import { buscar } from "../../api/api";
-import { Link } from "react-router-dom";
+import React from "react";
 import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import styled from "styled-components";
+import { Link } from "react-router-dom";
+import { CategoriasDatos } from "../../data/Categorias";
+import { VideosDatos } from "../../data/Videos";
+
+const VideoSlider = ({ settings, videos }) => {
+  return (
+    <Slider {...settings}>
+      {videos.map((video) => (
+        <Link to={`/videos/${video.id}`} key={video.id}>
+          <CajaVideo>
+            <ImagenVideo
+              src={`http://img.youtube.com/vi/${video.img}/maxresdefault.jpg`}
+              alt={video.title}
+              bordercolor={video.categoria ? video.categoria.color : "#000"}
+            />
+          </CajaVideo>
+        </Link>
+      ))}
+    </Slider>
+  );
+};
+
+const CajaVideo = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 1rem 0;
+  text-align: center;
+  :hover {
+    transform: scale(1.1);
+  }
+`;
+
+const ImagenVideo = styled.img`
+  width: 70%;
+  border: 3px solid ${(props) => props.bordercolor};
+  @media screen and (max-width: 768px) {
+    width: 100%;
+  }
+`;
 
 const VideoLista = () => {
-  const [videosPorCategoria, setVideosPorCategoria] = useState({});
+  const [videosPorCategoria, setVideosPorCategoria] = React.useState({});
 
-  useEffect(() => {
-    // Realiza una solicitud para obtener la lista de videos desde la API cuando se monta el componente
-    buscar("/videos", (videos) => {
-      // Organizar los videos por categoría
-      const videosCategorizados = videos.reduce((acc, video) => {
-        const categoria = video.categoria.nombre; // Acceder al nombre de la categoría
+  React.useEffect(() => {
+    // Combina los datos de VideosDatos con los nuevos videos de localStorage
+    const todosLosVideos = [...VideosDatos, ...(JSON.parse(localStorage.getItem("nuevosVideos")) || [])];
 
-        if (!acc[categoria]) {
-          acc[categoria] = [];
-        }
-        acc[categoria].push(video);
-        return acc;
-      }, {});
+    // Organiza los videos por categoría utilizando las categorías y los nuevos videos
+    const videosCategorizados = CategoriasDatos.reduce((acc, categoria) => {
+      const categoriaNombre = categoria.nombre;
+      const videosDeCategoria = todosLosVideos.filter(
+        (video) => video.categoria.nombre === categoriaNombre
+      );
 
-      // Establece el estado con los videos organizados por categoría
-      setVideosPorCategoria(videosCategorizados);
-    });
+      acc[categoriaNombre] = {
+        color: categoria.color,
+        videos: videosDeCategoria,
+      };
+      return acc;
+    }, {});
+
+    setVideosPorCategoria(videosCategorizados);
   }, []);
 
-  // Configuración del carrousel de videos
   const settings = {
     dots: false,
     infinite: true,
@@ -65,60 +101,23 @@ const VideoLista = () => {
   };
 
   return (
-    <>
-      {Object.keys(videosPorCategoria).map((categoria) => {
-        const videos = videosPorCategoria[categoria];
-        return (
-          <div key={categoria}>
-            {/* Renderiza el título de la categoría con el color de fondo */}
-            <CategoriaTitulo color={videos[0].categoria.color}>{categoria}</CategoriaTitulo>
-            <Slider {...settings}>
-              {videos.map((video) => {
-                const { id, title, img, categoria } = video;
-                return (
-                  // Renderiza un enlace a la página de detalle de video
-                  <Link to={`/videos/${id}`} key={id}>
-                    <CajaVideo>
-
-                        {/* Renderiza la imagen del video con un borde del color de la categoría */}
-                        <ImagenVideo
-                          src={`http://img.youtube.com/vi/${img}/maxresdefault.jpg`}
-                          alt={title}
-                          style={{ borderColor: categoria.color }}
-                        />
-
-                    </CajaVideo>
-                  </Link>
-                );
-              })}
-            </Slider>
-          </div>
-        );
-      })}
-    </>
+    <div>
+      {Object.keys(videosPorCategoria).map((categoriaNombre) => (
+        <div key={categoriaNombre}>
+          <CategoriaTitulo color={videosPorCategoria[categoriaNombre]?.color}>
+            {categoriaNombre}
+          </CategoriaTitulo>
+          <VideoSlider
+            settings={settings}
+            videos={videosPorCategoria[categoriaNombre]?.videos || []}
+          />
+        </div>
+      ))}
+    </div>
   );
 };
 
-export default VideoLista;
-
-// Estilos CSS con styled-components
-const CajaVideo = styled.div`
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 1rem 0;
-  text-align: center;
-  :hover {
-    transform: scale(1.1); // Efecto de escala al pasar el ratón sobre el video
-  }
-`;
-const ImagenVideo = styled.img`
-  width: 70%;
-  border: 3px solid ${(props) => props.borderColor}; // Establece el color del borde con base en la categoría
-  @media screen and (max-width: 768px) {
-    width: 100%;
-  }
-`;
-const CategoriaTitulo = styled.h3`
+const CategoriaTitulo = styled.h2`
   text-align: center;
   display: flex;
   width: 19.3043rem;
@@ -130,5 +129,8 @@ const CategoriaTitulo = styled.h3`
   font-style: normal;
   font-weight: 400;
   line-height: normal;
-  background-color: ${(props) => props.color}; // Establece el color de fondo con base en la categoría
+  background-color: ${(props) => props.color};
+  color: white;
 `;
+
+export default VideoLista;
